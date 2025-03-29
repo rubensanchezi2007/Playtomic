@@ -2,9 +2,15 @@ spring.profiles.active: develop
 server:
   port: 8090
 ---
+
 spring.config.activate.on-profile: develop
 spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   jpa:
+    defer-datasource-initialization: true
     show_sql: false
     database: H2
   datasource:
@@ -12,10 +18,20 @@ spring:
     initialize: false
 stripe.simulator.charges-uri: https://sandbox.playtomic.io/v1/stripe-simulator/charges
 stripe.simulator.refunds-uri: https://sandbox.playtomic.io/v1/stripe-simulator/payments/{payment_id}/refunds
+spring.h2.activate.on-profile: enabled
+
+
+
+
 ---
 spring.config.activate.on-profile: test
 spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   jpa:
+    defer-datasource-initialization: true
     show_sql: false
     database: H2
   datasource:
