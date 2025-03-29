@@ -48,7 +48,7 @@ public class WalletApplicationIT {
 				.build();
 
 
-		MvcResult currentResponse= mockMvc.perform(MockMvcRequestBuilders.get("/api/wallet")
+		MvcResult currentResponse= mockMvc.perform(MockMvcRequestBuilders.get("/api/wallets/" + 1L )
 				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andReturn();
@@ -70,7 +70,7 @@ public class WalletApplicationIT {
 				.name("EuroWallet")
 				.build();
 
-		MvcResult currentResponse=mockMvc.perform(MockMvcRequestBuilders.get("/api/wallet/" + 999L)
+		MvcResult currentResponse=mockMvc.perform(MockMvcRequestBuilders.get("/api/wallets/" + 999L)
 						.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andReturn();
