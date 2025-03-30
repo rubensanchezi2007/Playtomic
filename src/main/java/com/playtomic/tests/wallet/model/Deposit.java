@@ -1,13 +1,14 @@
 package com.playtomic.tests.wallet.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -16,7 +17,10 @@ public class Deposit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
+
+    //IDempotency with DB
+    private Long requestId;
 
     @Column
     BigDecimal amount;
@@ -29,7 +33,13 @@ public class Deposit {
     @Column
     String note;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn (name = "wallet_id")
     Wallet wallet;
+
+    @JsonPOJOBuilder(withPrefix="")
+    public static class Builder {}
+
+
 }

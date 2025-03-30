@@ -1,5 +1,6 @@
 package com.playtomic.tests.wallet.api;
 
+import com.playtomic.tests.wallet.model.Wallet;
 import com.playtomic.tests.wallet.model.WalletResponse;
 import com.playtomic.tests.wallet.service.IWalletService;
 import com.playtomic.tests.wallet.service.WalletService;
@@ -27,7 +28,14 @@ public class WalletController {
     @GetMapping("/{id}")
     ResponseEntity<WalletResponse> getWalletByID (@PathVariable long id)
     {
-            return ResponseEntity.ok(walletService.getWalletByID(id));
+           log.info("Received request to GET wallet ID {}",id );
+           Wallet wallet=walletService.getWalletByID(id);
+
+            return ResponseEntity.ok( WalletResponse.builder()
+                    .name(wallet.getName())
+                    .balance(wallet.getBalance())
+                    .depositList(wallet.getDepositList())
+                    .build());
 
     }
     //void log() {

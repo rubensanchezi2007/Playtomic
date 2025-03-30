@@ -19,7 +19,6 @@ import java.util.List;
 @JsonDeserialize(builder = WalletResponse.Builder.class)
 
 public class WalletResponse {
-    private final String playerEmailAddress;
     private final String name;
     private final BigDecimal balance;
     private final String currency;

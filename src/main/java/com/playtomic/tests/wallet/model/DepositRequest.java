@@ -15,9 +15,11 @@ import java.math.BigDecimal;
 @JsonDeserialize(builder = DepositRequest.Builder.class)
 public class DepositRequest {
     //Used for idempotency since im using POST
-    private final String requestId;
+    private final Long requestId;
     private final String cardNumber;
     private final BigDecimal amount;
+    private final Long walletId;
+
 
 
     @JsonPOJOBuilder(withPrefix="")

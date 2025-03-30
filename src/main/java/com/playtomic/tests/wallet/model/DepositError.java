@@ -1,14 +1,25 @@
 package com.playtomic.tests.wallet.model;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
+@Builder
 @RequiredArgsConstructor
 public class DepositError {
 
+    public static final DepositError ERROR_PROCESSING_DEPOSIT_UNEXPECTED =
+            of(202,"Unexpected Error processing deposit");
+
+
+
     public static final DepositError ERROR_PROCESSING_DEPOSIT_GATEWAY =
-            of(101,"Error processing deposit through Gateway");
+            of(202,"Error processing deposit through Gateway");
+
+    public static final DepositError ERROR_PROCESSING_DEPOSIT_ALREADY_EXIST =
+            of(203,"Duplicated Deposit. Do nothing");
+
 
     private final int errorCode;
     private final String errorMessage;
