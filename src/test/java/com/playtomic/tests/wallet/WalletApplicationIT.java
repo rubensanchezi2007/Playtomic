@@ -3,8 +3,7 @@ package com.playtomic.tests.wallet;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.playtomic.tests.wallet.model.Deposit;
-import com.playtomic.tests.wallet.model.WalletResponse;
+import com.playtomic.tests.wallet.model.*;
 import com.playtomic.tests.wallet.service.IWalletService;
 import com.playtomic.tests.wallet.service.StripeRestTemplateResponseErrorHandler;
 import com.playtomic.tests.wallet.service.WalletService;
@@ -23,6 +22,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.client.RestTemplate;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -63,7 +63,6 @@ public class WalletApplicationIT {
 				.andReturn();
 
 		ObjectMapper objectMapper= new ObjectMapper();
-		//objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		WalletResponse walletResponse = objectMapper.readValue(currentResponse.getResponse().getContentAsString(), WalletResponse.class);
 
 		assertNotNull(walletResponse);
@@ -91,4 +90,43 @@ public class WalletApplicationIT {
 		assertNull(expectedResponse.getCurrency());
 
 	}
+
+
+	@Test
+	public void processDepositSuccess() throws Exception {
+
+		DepositResponse expectedResponse= DepositResponse.builder()
+				.build();
+
+		//when(depositService.processDeposit(any(DepositRequest.class))).thenReturn(expectedResponse);
+
+		MvcResult currentResponse=mockMvc.perform(MockMvcRequestBuilders.post("/api/deposits/")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andReturn();
+
+
+
+	}
+
+	@Test
+	public void processDepositError() throws Exception {
+
+		DepositResponse expectedResponse= DepositResponse.builder()
+				.build();
+
+		//when(depositService.processDeposit(any(DepositRequest.class))).thenReturn(expectedResponse);
+
+		MvcResult currentResponse=mockMvc.perform(MockMvcRequestBuilders.post("/api/deposits/")
+						.contentType(MediaType.APPLICATION_JSON))
+				.andExpect(MockMvcResultMatchers.status().isOk())
+				.andReturn();
+
+		ObjectMapper objectMapper= new ObjectMapper();
+		DepositError error = objectMapper.readValue(currentResponse.getResponse().getContentAsString(), DepositError.class);
+        assertNotNull(error.getErrorCode());
+		assertNotNull(error.getErrorMessage());
+
+	}
+
 }
