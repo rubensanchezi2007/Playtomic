@@ -10,6 +10,8 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.repository.Lock;
@@ -21,6 +23,9 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class WalletService implements IWalletService {
+
+    private static final Logger log = LoggerFactory.getLogger(WalletService.class);
+
 
     WalletRepository walletRepository;
     ApplicationEventPublisher applicationEventPublisher;
@@ -48,20 +53,18 @@ public class WalletService implements IWalletService {
     }
 
     @Transactional
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Override
-    public void updateBalance(long id,BigDecimal amount,String paymentId) {
-       Optional<Wallet> wallet =walletRepository.findById(id);
-       if (wallet.isPresent())
-        {
-            Wallet updatedWallet=wallet.get();
-            updatedWallet.setBalance(wallet.get().getBalance().add(amount));
-            walletRepository.save(updatedWallet );
-            applicationEventPublisher.publishEvent(new DepositProcessedEvent(paymentId));
+    public void updateBalance(long id, BigDecimal amount, String paymentId) {
 
-        }
-
+        log.info("Updating balance walletId {} amount {} paymentId {}",id,amount,paymentId);
+        Wallet wallet =walletRepository.findWalletById(id);
+        wallet.setBalance(wallet.getBalance().add(amount));
+        walletRepository.save(wallet );
+        applicationEventPublisher.publishEvent(new DepositProcessedEvent(paymentId));
+        log.info("Updated balance new balance {}",wallet.getBalance());
 
     }
+
+
 
 }

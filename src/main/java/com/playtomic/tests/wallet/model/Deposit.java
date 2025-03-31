@@ -20,7 +20,11 @@ public class Deposit {
     private Long id;
 
     //IDempotency with DB
+    @Column (unique=true)
     private Long requestId;
+
+    @Column (unique=true)
+    private String externalPaymentId;
 
     @Column
     BigDecimal amount;
@@ -37,6 +41,7 @@ public class Deposit {
     @ManyToOne
     @JoinColumn (name = "wallet_id")
     Wallet wallet;
+
 
     @JsonPOJOBuilder(withPrefix="")
     public static class Builder {}

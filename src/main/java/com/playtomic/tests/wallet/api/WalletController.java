@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 
-@RequestMapping("api/wallets")
+@RequestMapping("/api/wallets")
 public class WalletController {
     private static final Logger log = LoggerFactory.getLogger(WalletController.class);
 
