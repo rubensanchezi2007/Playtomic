@@ -3,10 +3,15 @@ package com.playtomic.tests.wallet;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.playtomic.tests.wallet.api.WalletController;
+import com.playtomic.tests.wallet.exception.WalletControllerAdvice;
+import com.playtomic.tests.wallet.exception.WalletException;
 import com.playtomic.tests.wallet.model.*;
 import com.playtomic.tests.wallet.service.*;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -18,9 +23,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.client.RestTemplate;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -29,19 +37,31 @@ import java.util.Collections;
 
 @SpringBootTest
 @ActiveProfiles(profiles = "test")
-@AutoConfigureMockMvc
+
 public class WalletApplicationIT {
 
 
 	@Autowired
 	MockMvc mockMvc;
-	RestTemplate restTemplate;
 
 	@MockBean
 	IWalletService walletService;
 
 	@MockBean
 	IDepositService depositService;
+
+	@Autowired
+	private WalletController controller;
+
+	@BeforeEach
+	public void setup() {
+		this.mockMvc = MockMvcBuilders
+				.standaloneSetup(controller)
+				.setControllerAdvice(
+						WalletControllerAdvice.class)
+				.build();
+	}
+
 
 	@Test
 	public void getWalletSuccess() throws Exception {
@@ -78,59 +98,28 @@ public class WalletApplicationIT {
 
 	}
 
-	/*@Test
+	@Test
 	public void getWalletNotFound() throws Exception {
 
-		WalletResponse expectedResponse= WalletResponse.builder()
-				.build();
+		WalletError expectedWalletError= WalletError.WALLET_NOT_FOUND;
 
-		when(walletService.getWalletByID(1L)).thenReturn(new Wallet());
+		when(walletService.getWalletByID(2L)).thenThrow(WalletException.notFound());
 
-		MvcResult currentResponse=mockMvc.perform(MockMvcRequestBuilders.get("/api/wallets/" + 1L)
-						.contentType(MediaType.APPLICATION_JSON))
+		MvcResult currentResponse=mockMvc.perform(MockMvcRequestBuilders.get("/api/wallets/" + 2L)
+				.contentType(MediaType.APPLICATION_JSON))
 				.andExpect(MockMvcResultMatchers.status().isOk())
 				.andReturn();
 
 
-
-	}*/
-
-
-	/*@Test
-	public void processDepositSuccess() throws Exception {
-
-		DepositResponse expectedResponse= DepositResponse.builder()
-				.build();
-
-		//when(depositService.processDeposit(any(DepositRequest.class))).thenReturn(expectedResponse);
-
-		MvcResult currentResponse=mockMvc.perform(MockMvcRequestBuilders.post("/api/deposits/")
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andReturn();
+		ObjectMapper objectMapper= new ObjectMapper();
+		WalletError currrentWalletError = objectMapper.readValue(currentResponse.getResponse().getContentAsString(), WalletError.class);
 
 
+		assertEquals(expectedWalletError.getErrorCode(),currrentWalletError.getErrorCode());
+		assertEquals(expectedWalletError.getErrorMessage(),currrentWalletError.getErrorMessage());
 
 	}
 
-	@Test
-	public void processDepositError() throws Exception {
 
-		DepositResponse expectedResponse= DepositResponse.builder()
-				.build();
-
-		//when(depositService.processDeposit(any(DepositRequest.class))).thenReturn(expectedResponse);
-
-		MvcResult currentResponse=mockMvc.perform(MockMvcRequestBuilders.post("/api/deposits/")
-						.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(MockMvcResultMatchers.status().isOk())
-				.andReturn();
-
-		ObjectMapper objectMapper= new ObjectMapper();
-		DepositError error = objectMapper.readValue(currentResponse.getResponse().getContentAsString(), DepositError.class);
-        assertNotNull(error.getErrorCode());
-		assertNotNull(error.getErrorMessage());
-
-	}*/
 
 }

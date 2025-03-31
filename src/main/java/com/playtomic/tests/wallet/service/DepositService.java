@@ -49,47 +49,47 @@ public class DepositService implements IDepositService {
     public void refundDeposit(DepositProcessedEvent depositProcessedEvent) {
         log.info("Received event to refund deposit, paymentId {}",depositProcessedEvent.getPaymentId());
         stripeService.refund(depositProcessedEvent.getPaymentId());
-        //TODO: decline deposit
+        Deposit deposit= depositRepository.findByRequestId(depositProcessedEvent.getRequestId()).get();
+        deposit.setStatus("DECLINED");
+        deposit.setNote("Declined due to update balance rollback. Refunded.");
+        depositRepository.save(deposit);
+
     }
 
     @Override
     public DepositResponse processDeposit(DepositRequest depositRequest) {
 
-
-       Cache cache=(Cache) cacheManager.getCache("depositRequest").getNativeCache();
+        //Cache mechanism for idempotency based on Cache and Caffeine. Not currently in use
+       // Cache cache=(Cache) cacheManager.getCache("depositRequest").getNativeCache();
        //if (!cache.asMap().containsValue(depositRequest.getRequestId()))
         if (depositRepository.findByRequestId(depositRequest.getRequestId()).isEmpty())
         {
             cacheService.cacheRequestId(depositRequest);
-
             log.info("New deposit detected requestId {}",depositRequest.getRequestId());
 
             Wallet wallet= walletService.getWalletByID(depositRequest.getWalletId());
+
             Deposit deposit= new Deposit();
             deposit.setAmount(depositRequest.getAmount());
             deposit.setRequestId(depositRequest.getRequestId());
             deposit.setStatus("PENDING");
+            deposit.setNote("Deposit created in pending status");
             deposit.setWallet(wallet);
-
-
             depositRepository.save(deposit);
 
+            Payment payment=stripeService.charge(depositRequest.getCardNumber(),depositRequest.getAmount());
 
-            //Payment payment=stripeService.charge(depositRequest.getCardNumber(),depositRequest.getAmount());
-
-            String generatedPaymentId = RandomStringUtils.random(8, false, true);
-
-            deposit.setExternalPaymentId(generatedPaymentId);
+            deposit.setExternalPaymentId(payment.getId());
             deposit.setStatus("APPROVED");
-
+            deposit.setNote("Deposit approved");
             depositRepository.save(deposit);
 
-            walletService.updateBalance(wallet.getId(),depositRequest.getAmount(),"12345");
+            walletService.updateBalance(wallet.getId(),depositRequest.getAmount(), payment.getId(), deposit.getRequestId());
 
             return DepositResponse.builder().amount(depositRequest.getAmount())
                     .currency(wallet.getCurrency())
                     .status(deposit.getStatus())
-                    .transactionId(generatedPaymentId).build();
+                    .transactionId(payment.getId()).build();
         }
 
         throw DepositException.alreadyExists();

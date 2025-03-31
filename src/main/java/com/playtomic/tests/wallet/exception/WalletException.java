@@ -14,9 +14,9 @@ public class WalletException extends RuntimeException{
     private final HttpStatus httpStatus;
 
 
-    public static WalletException notFound(WalletError walletError)
+    public static WalletException notFound()
     {
-        return WalletException.builder().error(walletError).httpStatus(HttpStatus.OK).build();
+        return WalletException.builder().error(WalletError.WALLET_NOT_FOUND).httpStatus(HttpStatus.OK).build();
     }
 
 }

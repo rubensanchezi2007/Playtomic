@@ -39,28 +39,24 @@ public class WalletService implements IWalletService {
     @Override
     public Wallet getWalletByID(Long id) {
         Optional<Wallet> wallet=walletRepository.findById(id);
-        if (wallet.isPresent())
+        if (wallet.isPresent()) {
             return wallet.get();
-                    /*WalletResponse.builder()
-                    .name(wallet.get().getName())
-                    .balance(wallet.get().getBalance())
-                    .playerEmailAddress(wallet.get().getPlayer().getEmailAddress())
-                    .depositList(wallet.get().getDepositList())
-                    .build();*/
-        else
-           // return WalletResponse.builder().build();
-            throw WalletException.notFound(WalletError.WALLET_NOT_FOUND);
+        }
+        else {
+            throw WalletException.notFound();
+        }
     }
 
     @Transactional
     @Override
-    public void updateBalance(long id, BigDecimal amount, String paymentId) {
+    public void updateBalance(long id, BigDecimal amount, String paymentId,Long requestId) {
 
-        log.info("Updating balance walletId {} amount {} paymentId {}",id,amount,paymentId);
         Wallet wallet =walletRepository.findWalletById(id);
+        log.info("Updating balance currentBalance {} walletId {} amount {} paymentId {}",wallet.getBalance(),id,amount,paymentId);
+
         wallet.setBalance(wallet.getBalance().add(amount));
         walletRepository.save(wallet );
-        applicationEventPublisher.publishEvent(new DepositProcessedEvent(paymentId));
+        applicationEventPublisher.publishEvent(new DepositProcessedEvent(paymentId,requestId));
         log.info("Updated balance new balance {}",wallet.getBalance());
 
     }

@@ -7,4 +7,5 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DepositProcessedEvent {
     private final String paymentId;
+    private final Long requestId;
 }

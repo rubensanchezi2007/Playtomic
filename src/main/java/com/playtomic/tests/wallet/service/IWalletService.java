@@ -11,5 +11,5 @@ public interface IWalletService {
 
 
 
-    void updateBalance (long id, BigDecimal amount,String paymentId);
+    void updateBalance (long id, BigDecimal amount,String paymentId,Long requestId);
 }

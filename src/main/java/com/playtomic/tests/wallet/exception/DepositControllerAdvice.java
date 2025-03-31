@@ -4,6 +4,8 @@ import com.playtomic.tests.wallet.model.DepositError;
 import com.playtomic.tests.wallet.model.WalletError;
 import com.playtomic.tests.wallet.service.StripeRestTemplateResponseErrorHandler;
 import com.playtomic.tests.wallet.service.StripeServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,9 +16,14 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @RestControllerAdvice (annotations = RestController.class)
 public class DepositControllerAdvice extends ResponseEntityExceptionHandler {
 
+    private static final Logger log = LoggerFactory.getLogger(DepositControllerAdvice.class);
+
+
     @ExceptionHandler(StripeServiceException.class)
     public ResponseEntity<DepositError> depositStripeError(final StripeServiceException e)
     {
+        log.error("Call to stripe service failed with errorMessage {}",e.getMessage());
+
         return new ResponseEntity<>(
                 DepositError.builder()
                         .errorCode(DepositError.ERROR_PROCESSING_DEPOSIT_GATEWAY.getErrorCode())
@@ -30,6 +37,7 @@ public class DepositControllerAdvice extends ResponseEntityExceptionHandler {
     @ExceptionHandler(DepositException.class)
     public ResponseEntity<DepositError> depositError(final DepositException e)
     {
+        log.error("Call to Deposit service failed with errorCode {}, errorMessage {}",e.getError().getErrorCode(),e.getMessage());
         return new ResponseEntity<>(
                 DepositError.builder()
                         .errorCode(e.getError().getErrorCode())
