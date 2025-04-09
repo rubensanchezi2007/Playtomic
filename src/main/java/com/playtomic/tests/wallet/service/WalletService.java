@@ -39,12 +39,9 @@ public class WalletService implements IWalletService {
     @Override
     public Wallet getWalletByID(Long id) {
         Optional<Wallet> wallet=walletRepository.findById(id);
-        if (wallet.isPresent()) {
-            return wallet.get();
-        }
-        else {
-            throw WalletException.notFound();
-        }
+
+        return wallet.map(w->wallet.get()).orElseThrow(WalletException::notFound);
+
     }
 
     @Transactional

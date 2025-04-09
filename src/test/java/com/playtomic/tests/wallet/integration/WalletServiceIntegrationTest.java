@@ -96,7 +96,6 @@ public class WalletServiceIntegrationTest {
     }
 
     @Test
-    @Transactional
     @Order(3)
     public void testGetEXistingWalletNewDeposit()  throws Exception
     {
